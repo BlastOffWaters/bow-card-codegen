@@ -1,0 +1,6 @@
+# User-specific stuff
+/.idea
+bow-card-codegen.iml
+
+# Credentials
+mysql_credentials.json
