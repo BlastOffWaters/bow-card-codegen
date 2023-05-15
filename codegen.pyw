@@ -13,7 +13,7 @@ number_to_generate_explain = Text(group, "Enter the number of codes to generate:
 number_to_generate = TextBox(group, grid=[1,1], text="1")
 spacer2 = Text(group, "", 5, grid=[0,2])
 type_to_generate_explain = Text(group, "Select the code type you are generating:", grid=[0,3])
-type_to_generate = Combo(group, options=["Card", "Game Token"], grid=[1,3])
+type_to_generate = Combo(group, options=["Card", "Other"], grid=[1,3])
 # Pop up the codes after being generated and submitted
 def list_codes(code_list):
     # Create a basic display setup
@@ -21,14 +21,14 @@ def list_codes(code_list):
     title2 = Text(code_list_window, "Generated Codes", size=14)
     codes_shown = Text(code_list_window, text=code_list, size=12)
 # Add the generated code to the database
-def add_code_to_db(code):
-    # Print the code
-    print("Code submitting to database, code is " + code)
-    # Pick what type to add to the database table
+def add_code_to_db(code, animation):
+    # Pick what type to add to the database table.
     if type_to_generate.value == "Card":
         type_generating = "card"
-    elif type_to_generate.value == "Game Token":
-        type_generating = "game_token"
+    elif type_to_generate.value == "Other":
+        type_generating = "other"
+    # Print the code to console (testing purposes)
+    print("Code submitting to database, code is " + code + ", type is " + type_generating + ", and animation ID is " + str(animation))
     # Load the MySQL credentials from a JSON file
     with open('mysql_credentials.json') as f:
         credentials = json.load(f)
@@ -45,18 +45,24 @@ def add_code_to_db(code):
         print("Failed to connect to MySQL database: {}".format(err))
     # Add the data to the database
     mycursor = database.cursor()
-    sql = "INSERT INTO general_data (code, type) VALUES (%s, %s)"
-    val = (code, type_generating)
+    sql = "INSERT INTO general_data (code, type, animation_id) VALUES (%s, %s, %s)"
+    val = (code, type_generating, animation)
     mycursor.execute(sql, val)
-    if type_generating == "card":
-        sql2 = "INSERT INTO card_data (code, is_filled_out) VALUES (%s, %s)"
-        val2 = (code, 0)
-        mycursor.execute(sql2, val2)
-    elif type_generating == "game_token":
-        sql2 = "INSERT INTO game_data (code, plays) VALUES (%s, %s)"
-        val2 = (code, 3)
-        mycursor.execute(sql2, val2)
+    # Submit the data
     database.commit()
+# Pick a random animation to use with the code.
+def pick_animation(code):
+    # Pick what type to generate animations.
+    if type_to_generate.value == "Card":
+        # Pick a random animation ID to add to the code.
+        animation_id = random.randint(0,1)
+        # Send the data to the database function.
+        add_code_to_db(code, animation_id)
+    elif type_to_generate.value == "Other":
+        # Pick a random animation ID to add to the code.
+        animation_id = random.randint(0,1)
+        # Send the data to the database function.
+        add_code_to_db(code, animation_id)
 # Generate the code and submit it to the database function
 def generate_code():
     # Create an empty list of codes
@@ -79,7 +85,7 @@ def generate_code():
                 code_letter = random.choice(alphabet)
                 generated_code = generated_code + code_letter
         # Send code to the database function
-        add_code_to_db(generated_code)
+        pick_animation(generated_code)
         # Add the new code to the code list
         code_list.append(generated_code)
     else:
