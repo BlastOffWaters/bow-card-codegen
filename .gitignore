@@ -3,4 +3,4 @@
 bow-card-codegen.iml
 
 # Credentials
-mysql_credentials.json
+db_credentials.json

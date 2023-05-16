@@ -1,5 +1,5 @@
 from guizero import App, Text, Box, Combo, TextBox, Window, PushButton
-import mysql.connector
+import psycopg2
 import random
 import json
 
@@ -30,26 +30,27 @@ def add_code_to_db(code, animation):
     # Print the code to console (testing purposes)
     print("Code submitting to database, code is " + code + ", type is " + type_generating + ", and animation ID is " + str(animation))
     # Load the MySQL credentials from a JSON file
-    with open('mysql_credentials.json') as f:
+    with open('db_credentials.json') as f:
         credentials = json.load(f)
-    # Connect to the MySQL database using the retrieved credentials
-    try:
-        database = mysql.connector.connect(
-            user=credentials['user'],
-            password=credentials['password'],
-            host=credentials['host'],
-            database=credentials['database']
-        )
-        print("Connected to MySQL database")
-    except mysql.connector.Error as err:
-        print("Failed to connect to MySQL database: {}".format(err))
-    # Add the data to the database
-    mycursor = database.cursor()
-    sql = "INSERT INTO general_data (code, type, animation_id) VALUES (%s, %s, %s)"
-    val = (code, type_generating, animation)
-    mycursor.execute(sql, val)
-    # Submit the data
-    database.commit()
+    # Connect to the Postgresql database using the retrieved credentials
+    conn = psycopg2.connect(
+        user=credentials['user'],
+        password=credentials['password'],
+        host=credentials['host'],
+        database=credentials['database']
+    )
+    # Open a cursor to perform database operations
+    cur = conn.cursor()
+    # Execute a query
+    cur.execute("""
+        INSERT INTO general_data (code, type, animation_id)
+        VALUES (%s, %s, %s);
+        """,
+        (code, type_generating, animation))
+    # Save the code to the database
+    conn.commit()
+    # Close the session
+    cur.close()
 # Pick a random animation to use with the code.
 def pick_animation(code):
     # Pick what type to generate animations.
