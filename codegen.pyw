@@ -53,17 +53,10 @@ def add_code_to_db(code, animation):
     cur.close()
 # Pick a random animation to use with the code.
 def pick_animation(code):
-    # Pick what type to generate animations.
-    if type_to_generate.value == "Card":
-        # Pick a random animation ID to add to the code.
-        animation_id = random.randint(0,1)
-        # Send the data to the database function.
-        add_code_to_db(code, animation_id)
-    elif type_to_generate.value == "Other":
-        # Pick a random animation ID to add to the code.
-        animation_id = random.randint(0,1)
-        # Send the data to the database function.
-        add_code_to_db(code, animation_id)
+    # Pick a random animation ID to add to the code.
+    animation_id = random.randint(0,9)
+    # Send code to the database.
+    add_code_to_db(code, animation_id)
 # Generate the code and submit it to the database function
 def generate_code():
     # Create an empty list of codes
